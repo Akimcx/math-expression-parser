@@ -1,73 +1,67 @@
 "use strict";
 import Lexer from "./Lexer.js"
 
-class Node {
-    eval(){}
-    print(){}
+abstract class Node {
+    abstract eval(): number
+    abstract print(): string
 }
 
 class AddNode extends Node {
     
-    /**
-     * 
-     * @param {Node} left 
-     * @param {Node} right 
-     */
-     constructor(left, right) {
+    private left:Node;
+    private right: Node;
+
+     constructor(left: Node, right: Node) {
         super()
         this.left = left,
         this.right = right
     }
 
-    eval() {
+    eval(): number {
         return this.left.eval() + this.right.eval()
     }
 
-    print() {
+    print(): string {
         return `(${this.left.print()} + ${this.right.print()})`
     }
 }
 
 class SubstractNode extends Node {
     
-    /**
-     * 
-     * @param {Node} left 
-     * @param {Node} right 
-     */
-     constructor(left, right) {
+    private left: Node
+    private right: Node
+
+     constructor(left: Node, right: Node) {
         super()
         this.left = left,
         this.right = right
     }
 
-    eval() {
+    eval(): number {
         return this.left.eval() - this.right.eval()
     }
 
-    print() {
+    print(): string {
         return `(${this.left.print()} - ${this.right.print()})`
     }
 }
 
 class MultiplyNode extends Node {
     
-    /**
-     * 
-     * @param {Node} left 
-     * @param {Node} right 
-     */
-    constructor(left, right) {
+    private left: Node
+    private right: Node
+
+    constructor(left: Node, right: Node) {
         super()
         this.left = left,
         this.right = right
     }
 
-    eval() {
+    eval(): number {
         return this.left.eval() * this.right.eval()
     }
 
-    print() {
+    print(): string {
         return `(${this.left.print()} * ${this.right.print()})`
     }
 
@@ -75,22 +69,19 @@ class MultiplyNode extends Node {
 
 class DivideNode extends Node {
     
-    /**
-     * 
-     * @param {IntegerNode | FloatNode} left 
-     * @param {IntegerNode | FloatNode} right 
-     */
-     constructor(left, right) {
+    private left: Node
+    private right: Node
+     constructor(left: Node, right: Node) {
         super()
         this.left = left,
         this.right = right
     }
 
-    eval() {
+    eval(): number {
         return this.left.eval() / this.right.eval()
     }
 
-    print() {
+    print(): string {
         return `(${this.left.print()} / ${this.right.print()})`
     }
 
@@ -98,40 +89,34 @@ class DivideNode extends Node {
 
 class IntegerNode extends Node {
         
-    /**
-     * 
-     * @param {Number} value 
-     */
-     constructor(value) {
+    private value: number
+     constructor(value: number) {
         super()
         this.value = value
     }
 
-    eval() {
+    eval(): number {
         return this.value
     }
 
-    print() {
+    print(): string {
         return `${this.eval()}`
     }
 }
 
 class FloatNode extends Node {
-        
-    /**
-     * 
-     * @param {Number} value 
-     */
-     constructor(value) {
+
+    private value: number
+     constructor(value: number) {
         super()
         this.value = value
     }
 
-    eval() {
+    eval(): number {
         return this.value
     }
 
-    print() {
+    print(): string {
         return `${this.eval()}`
     }
 }
@@ -139,20 +124,17 @@ class FloatNode extends Node {
 
 class NegateNode extends Node {
 
-    /**
-     * 
-     * @param {Node} node 
-     */
-    constructor(node) {
+    private node: Node
+    constructor(node:  Node) {
         super()
         this.node = node
     }
 
-    eval() {
+    eval(): number {
         return -(this.node.eval())
     }
 
-    print() {
+    print(): string {
         return `(-${this.node.print()})`
     }
 }
@@ -169,13 +151,10 @@ export default class Parser {
      * Digit ::= 1|2|3|4|5|6|7|8|9|0
      */
 
+    private lexer: Lexer
 
-    /**
-     * @param {String} str 
-     */
-    constructor(str) {
+    constructor(str: string) {
         this.lexer = new Lexer(str)
-        this.expr = str
     }
 
     /**
@@ -192,14 +171,15 @@ export default class Parser {
         let a = this.parseTerm()
 
         while(true) {
+            const peekable = this.lexer.peek();
             // We reach the end of our input
-            if(!this.lexer.peek()) return a;
+            if(!peekable) return a;
 
-            if(this.lexer.peek().value === "+"){
+            if(peekable.value === "+"){
                 this.lexer.next()
                 let b = this.parseTerm()
                 a = new AddNode(a, b)
-            } else if (this.lexer.peek().value === "-"){
+            } else if (peekable.value === "-"){
                 this.lexer.next()
                 let b = this.parseTerm()
                 a = new SubstractNode(a, b)
@@ -213,17 +193,18 @@ export default class Parser {
      * Term ::= <Factor> {"*"|"/" <Factor>}
      */
     parseTerm() {
-        let a = this.parseFactor()
+        let a: Node = this.parseFactor()
 
         while(true) {
+            const peekable = this.lexer.peek();
             // We reach the end of our input
-            if(!this.lexer.peek()) return a;
+            if(!peekable) return a;
 
-            if(this.lexer.peek().value === "*"){
+            if(peekable.value === "*"){
                 this.lexer.next()
                 let b = this.parseFactor()
                 a = new MultiplyNode(a, b)
-            } else if (this.lexer.peek().value === "/"){
+            } else if (peekable.value === "/"){
                 this.lexer.next()
                 let b = this.parseFactor()
                 a = new DivideNode(a, b)
@@ -236,8 +217,9 @@ export default class Parser {
     /**
      * Factor ::= <Integer> | <Float> | "("<Expression>")"
      */
-    parseFactor() {
+    parseFactor(): IntegerNode | FloatNode {
         const token = this.lexer.next()
+        if(!token) throw new SyntaxError("Token is undefined " + token)
         if(token.type === "Integer") {
             return new IntegerNode(parseInt(token.value))
         }
@@ -249,6 +231,6 @@ export default class Parser {
         if(token.type === "Open_Paren") {
             // TODO Handle Parenthesis
         } 
-        throw new SyntaxError(`Unexpected token: ${JSON.stringify(this.token)}`)
+        throw new SyntaxError(`Unexpected token: ${JSON.stringify(token)}`)
     }
 }

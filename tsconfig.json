@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig to read more about this file */
+
+    "target": "ESNext",                                  
+    "module": "commonjs",                                
+    "outDir": "dist",                                   
+    "esModuleInterop": true,                             
+    "forceConsistentCasingInFileNames": true,            
+    "strict": true,                                      
+    "alwaysStrict": true,                             
+    "skipLibCheck": true                                 
+  }
+}

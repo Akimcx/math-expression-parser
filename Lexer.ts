@@ -5,13 +5,12 @@ const Token = [
     {"type":"Lower_Operator", "rule": /^[+-]/},
 ]
 
-
 export default class Lexer {
-  /**
-   *
-   * @param {String} str
-   */
-  constructor(str) {
+
+  private expr: string
+  private cursor: number
+
+  constructor(str: string) {
     this.cursor = 0;
     this.expr = str;
   }
