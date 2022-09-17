@@ -168,7 +168,13 @@ export default class Parser {
      * Expression ::= ["-"] <Term> {"+"|"-" <Term>}
      */
     parseExpression() {
-        let a = this.parseTerm()
+        let a: Node;
+        if(this.lexer.peek()?.value === "-") {
+            this.lexer.next()
+            a = new NegateNode(this.parseTerm())
+        } else {
+            a = this.parseTerm()
+        }
 
         while(true) {
             const peekable = this.lexer.peek();

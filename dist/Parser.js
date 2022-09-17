@@ -7,8 +7,6 @@ const Lexer_js_1 = __importDefault(require("./Lexer.js"));
 class Node {
 }
 class AddNode extends Node {
-    left;
-    right;
     constructor(left, right) {
         super();
         this.left = left,
@@ -22,8 +20,6 @@ class AddNode extends Node {
     }
 }
 class SubstractNode extends Node {
-    left;
-    right;
     constructor(left, right) {
         super();
         this.left = left,
@@ -37,8 +33,6 @@ class SubstractNode extends Node {
     }
 }
 class MultiplyNode extends Node {
-    left;
-    right;
     constructor(left, right) {
         super();
         this.left = left,
@@ -52,8 +46,6 @@ class MultiplyNode extends Node {
     }
 }
 class DivideNode extends Node {
-    left;
-    right;
     constructor(left, right) {
         super();
         this.left = left,
@@ -67,7 +59,6 @@ class DivideNode extends Node {
     }
 }
 class IntegerNode extends Node {
-    value;
     constructor(value) {
         super();
         this.value = value;
@@ -80,7 +71,6 @@ class IntegerNode extends Node {
     }
 }
 class FloatNode extends Node {
-    value;
     constructor(value) {
         super();
         this.value = value;
@@ -93,7 +83,6 @@ class FloatNode extends Node {
     }
 }
 class NegateNode extends Node {
-    node;
     constructor(node) {
         super();
         this.node = node;
@@ -106,16 +95,6 @@ class NegateNode extends Node {
     }
 }
 class Parser {
-    /**
-     * Parser Grammar
-     * Expression ::= ["-"] <Term> {"+"|"-" <Term>}
-     * Term ::= <Factor> {"*"|"/" <Factor>}
-     * Factor ::= <Integer> | <Float> | "("<Expression>")"
-     * Float ::= Integer . Integer
-     * Integer ::= Digit {Digit}
-     * Digit ::= 1|2|3|4|5|6|7|8|9|0
-     */
-    lexer;
     constructor(str) {
         this.lexer = new Lexer_js_1.default(str);
     }
@@ -129,7 +108,15 @@ class Parser {
      * Expression ::= ["-"] <Term> {"+"|"-" <Term>}
      */
     parseExpression() {
-        let a = this.parseTerm();
+        var _a;
+        let a;
+        if (((_a = this.lexer.peek()) === null || _a === void 0 ? void 0 : _a.value) === "-") {
+            this.lexer.next();
+            a = new NegateNode(this.parseTerm());
+        }
+        else {
+            a = this.parseTerm();
+        }
         while (true) {
             const peekable = this.lexer.peek();
             // We reach the end of our input
