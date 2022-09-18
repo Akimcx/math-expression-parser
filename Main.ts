@@ -1,9 +1,29 @@
 import Parser from "./Parser.js"
-// const expr = "90+333-1+292-1+101"
-const expr = "     -1 * 8"
-// const expr = "1.0/3.0+1.0*3.0-9.0+4.0*3.0*45.1-19/2"
+import * as readline from "readline"
+import Lexer from "./Lexer.js"
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: "> "
+})
+const parser = new Parser()
+rl.prompt()
+rl.on("line", expr => {
+    const ast = parser.parse(expr)
+    console.log(`${ast.print()} = ${ast.eval()}`);
+    rl.prompt()
+})
 
-const parser = new Parser(expr)
-const ast = parser.parse()
-console.log(ast.print(),"=",ast.eval());
+// const expr = "8!"
+// const lexer = new Lexer(expr)
+// while(lexer.peek().type !== "NONE") {
+//     console.log(lexer.next());
+// }
+// const expr = "(1 * (3)) )))) + (-2))"
+
+// const lexer = new Lexer(expr)
+// while(lexer.peek().type !== "NONE") {
+//     console.log(lexer.next());
+// }
+
 // console.log(ast, ast.print(), ast.eval())

@@ -4,6 +4,9 @@ const Token = [
   {"type":"Integer", "rule": /^\d{1,}/},
   {"type":"Higher_Operator", "rule": /^[*/]/},
   {"type":"Lower_Operator", "rule": /^[+-]/},
+  {"type":"Open_Paren", "rule": /^\(/},
+  {"type":"Close_Paren", "rule": /^\)/},
+  {"type":"Unknown_Token", "rule": /^./},
 ]
 
 export default class Lexer {
@@ -16,7 +19,7 @@ export default class Lexer {
     this.expr = str;
   }
 
-  tokenize() {
+  private tokenize() {
     let match = null
       for(let token of Token) {
         match = token.rule.exec(this.expr.slice(this.cursor))
@@ -30,7 +33,7 @@ export default class Lexer {
           }
         }
     }
-    if(!match) throw new SyntaxError(`Unexpected token [${this.expr}]`)
+    if(!match) throw new SyntaxError(`Unexpected character [${this.expr.slice(this.cursor)}]`)
   }
 
   peek() {
@@ -49,7 +52,7 @@ export default class Lexer {
             }
         }
     }
-    return null
+    return {"type": "NONE", "value": ""}
   }
 
   /**

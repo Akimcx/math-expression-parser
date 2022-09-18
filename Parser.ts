@@ -153,34 +153,36 @@ export default class Parser {
 
     private lexer: Lexer
 
-    constructor(str: string) {
-        this.lexer = new Lexer(str)
+    constructor() {
+        this.lexer = new Lexer("")
     }
-
-    /**
-     * @returns Node
-     */
-    parse() {
+    
+    parse(str: string) {
+        this.lexer = new Lexer(str)
         return this.parseExpression()
     }
 
     /**
      * Expression ::= ["-"] <Term> {"+"|"-" <Term>}
      */
-    parseExpression() {
+    private parseExpression() {
         let a: Node;
-        if(this.lexer.peek()?.value === "-") {
+        if(this.lexer.peek().value === "-") {
             this.lexer.next()
             a = new NegateNode(this.parseTerm())
         } else {
             a = this.parseTerm()
         }
 
+        
         while(true) {
             const peekable = this.lexer.peek();
             // We reach the end of our input
-            if(!peekable) return a;
+            if(peekable.type === "NONE") return a;
 
+            if(peekable.type !== "Higher_Operator" && peekable.type !== "Lower_Operator") 
+                throw new SyntaxError("Unexpected token " + JSON.stringify(peekable))
+            
             if(peekable.value === "+"){
                 this.lexer.next()
                 let b = this.parseTerm()
@@ -198,13 +200,16 @@ export default class Parser {
     /**
      * Term ::= <Factor> {"*"|"/" <Factor>}
      */
-    parseTerm() {
+    private parseTerm() {
         let a: Node = this.parseFactor()
 
         while(true) {
             const peekable = this.lexer.peek();
             // We reach the end of our input
-            if(!peekable) return a;
+            if(peekable.type === "NONE") return a;
+
+            if(peekable.type !== "Higher_Operator" && peekable.type !== "Lower_Operator")
+                throw new SyntaxError("Unexpected token " + JSON.stringify(peekable))
 
             if(peekable.value === "*"){
                 this.lexer.next()
@@ -223,20 +228,25 @@ export default class Parser {
     /**
      * Factor ::= <Integer> | <Float> | "("<Expression>")"
      */
-    parseFactor(): IntegerNode | FloatNode {
-        const token = this.lexer.next()
-        if(!token) throw new SyntaxError("Token is undefined " + token)
+    private parseFactor(): IntegerNode | FloatNode | Node{
+        let token = this.lexer.next()
+        if(!token) throw new SyntaxError("Token is undefined " + JSON.stringify(token))
+
         if(token.type === "Integer") {
             return new IntegerNode(parseInt(token.value))
         }
-
         if(token.type === "Float") {
             return new FloatNode(parseFloat(token.value))
-        }
-
+        }        
         if(token.type === "Open_Paren") {
-            // TODO Handle Parenthesis
-        } 
+            const expr = this.parseExpression()
+            if(this.lexer.peek().type === "Close_Paren") {
+                this.lexer.next()
+                return expr
+            }
+            throw new SyntaxError("Token ')' expected instead got: " + JSON.stringify(token))
+        }
+        
         throw new SyntaxError(`Unexpected token: ${JSON.stringify(token)}`)
     }
 }
