@@ -2,13 +2,13 @@
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
-    "target": "ES2015",                                  
-    "module": "commonjs",                                
-    "outDir": "dist",                                   
+    "target": "ESNext",                                  
+    "module": "CommonJS",                                
+    "outDir": "dist",                             
     "esModuleInterop": true,                             
     "forceConsistentCasingInFileNames": true,            
     "strict": true,                                      
     "alwaysStrict": true,                             
-    "skipLibCheck": true                                 
+    "skipLibCheck": true                           
   }
 }
